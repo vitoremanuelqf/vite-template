@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '~/hooks/useAuth'
 
 export function Nav() {
+  const { signInWithGoogle, signOut } = useAuth()
+
   return (
     <nav>
       <ul style={{ listStyle: 'none', gap: '1rem', display: 'flex' }}>
@@ -30,6 +33,14 @@ export function Nav() {
 
         <li>
           <Link to="/news">News</Link>
+        </li>
+
+        <li>
+          <button onClick={signInWithGoogle}>Login</button>
+        </li>
+
+        <li>
+          <button onClick={signOut}>Logout</button>
         </li>
       </ul>
     </nav>

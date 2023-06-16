@@ -1,4 +1,4 @@
-import { ReactNode, createContext } from 'react'
+import { ReactNode, createContext, useEffect } from 'react'
 
 import * as firebase from 'firebase/auth'
 import { app } from '~/services/firebase/firebaseConfig'
@@ -6,6 +6,7 @@ import { app } from '~/services/firebase/firebaseConfig'
 interface AuthContextDataProps {
   isAuthenticated: boolean
 
+  signOut: () => void
   signInWithGoogle: () => void
 }
 
@@ -21,7 +22,24 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const auth = firebase.getAuth(app)
   const provider = new firebase.GoogleAuthProvider()
 
-  const isAuthenticated = false
+  const user = auth.currentUser
+  const isAuthenticated = !!user
+
+  console.log('Será?', isAuthenticated, user)
+
+  useEffect(() => {
+    firebase.onAuthStateChanged(auth, (user) => {
+      if (user) {
+        return user.providerData.forEach((profile) => {
+          console.log('  Name: ' + profile.displayName)
+          console.log('  Email: ' + profile.email)
+          console.log('  Photo URL: ' + profile.photoURL)
+        })
+      } else {
+        return null
+      }
+    })
+  }, [])
 
   async function signOut() {
     firebase
@@ -75,8 +93,28 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       })
   }
 
+  async function updatePassword({ newPassword }: any) {
+    if (!user) {
+      return console.log('User not authenticated')
+    }
+
+    await firebase
+      .updatePassword(user, newPassword)
+      .then((response) => console.log(response))
+      .catch((error) => console.log(error))
+  }
+
+  async function resetPassword({ email }: any) {
+    await firebase
+      .sendPasswordResetEmail(auth, email)
+      .then((response) => console.log(response))
+      .catch((error) => console.log(error))
+  }
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, signInWithGoogle }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, signInWithGoogle, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   )
