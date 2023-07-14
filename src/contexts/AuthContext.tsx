@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useEffect } from 'react'
 
 import * as firebase from 'firebase/auth'
+import { getStorage } from 'firebase/storage'
 import { app } from '~/services/firebase/firebaseConfig'
 
 interface AuthContextDataProps {
